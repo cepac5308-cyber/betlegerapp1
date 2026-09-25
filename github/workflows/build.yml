@@ -1,0 +1,95 @@
+name: Android derle
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+
+      - name: Bagimliliklar
+        run: npm install --legacy-peer-deps --no-audit --no-fund
+
+      - name: Testler
+        run: |
+          node src/engine/engine.test.js
+          node logic.test.mjs
+          node screens.test.mjs
+          node markets.test.mjs
+          node parser.test.mjs
+          node slips.test.mjs
+          node ui.test.mjs
+
+      - name: Surum numarasi
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "VERSION_NAME=${TAG:-1.0.0}" >> $GITHUB_ENV
+          echo "VERSION_CODE=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+
+      - name: Native projeyi uret
+        run: |
+          npx expo prebuild --platform android --no-install --clean
+          sed -i "s/versionCode 1/versionCode ${VERSION_CODE}/" android/app/build.gradle
+          sed -i "s/versionName \"1.0.0\"/versionName \"${VERSION_NAME}\"/" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
+
+      - name: Izinleri duzenle
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q POST_NOTIFICATIONS $M || \
+            sed -i 's|</manifest>|    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n</manifest>|' $M
+          echo "--- izinler ---"; grep uses-permission $M || true
+
+      - name: APK derle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+
+      - name: APK imzala
+        id: signapk
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_B64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: betledger-apk
+          path: ${{ steps.signapk.outputs.signedReleaseFile }}
+          retention-days: 30
+
+      - name: AAB derle
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: AAB imzala
+        id: signaab
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.KEYSTORE_B64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: betledger-aab
+          path: ${{ steps.signaab.outputs.signedReleaseFile }}
+          retention-days: 30

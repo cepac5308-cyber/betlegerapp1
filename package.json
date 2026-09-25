@@ -1,0 +1,35 @@
+{
+  "name": "betledger",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "test": "node src/engine/engine.test.js && node logic.test.mjs && node screens.test.mjs && node markets.test.mjs && node slips.test.mjs && node parser.test.mjs && node ui.test.mjs",
+    "test:parser": "node parser.test.mjs",
+    "test:screens": "node screens.test.mjs",
+    "test:logic": "node logic.test.mjs",
+    "test:slips": "node slips.test.mjs",
+    "test:markets": "node markets.test.mjs",
+    "test:ui": "node ui.test.mjs"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "expo": "~51.0.28",
+    "expo-device": "~6.0.2",
+    "expo-notifications": "~0.28.16",
+    "expo-status-bar": "~1.12.1",
+    "react": "18.2.0",
+    "react-native": "0.74.5",
+    "react-native-svg": "15.2.0",
+    "expo-image-picker": "~15.0.7",
+    "@react-native-ml-kit/text-recognition": "^1.5.2",
+    "expo-haptics": "~13.0.1",
+    "expo-font": "~12.0.10",
+    "expo-splash-screen": "~0.27.7",
+    "@expo-google-fonts/sora": "^0.2.3",
+    "@expo-google-fonts/plus-jakarta-sans": "^0.2.3"
+  },
+  "private": true
+}

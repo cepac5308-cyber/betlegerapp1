@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "BetLedger",
+    "slug": "betledger",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "betledger",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F4F6FA"
+    },
+    "android": {
+      "package": "com.pakitasimacilik.betledger",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-foreground.png",
+        "backgroundColor": "#3A46AE"
+      },
+      "permissions": [
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.pakitasimacilik.betledger",
+      "supportsTablet": true
+    },
+    "plugins": [
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Kupon görüntüsünü okumak için seçtiğin fotoğrafa erişilir."
+        }
+      ]
+    ]
+  }
+}
